@@ -4,6 +4,7 @@ Created on Sat Mar 24 16:10:17 2018
 
 @author: baile
 """
+import numpy as np
 def Sigmoid(z, derivative):
         if derivative:
             return Sigmoid(z, False)*(1-Sigmoid(z,False))

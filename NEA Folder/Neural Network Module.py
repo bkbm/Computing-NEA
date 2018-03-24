@@ -6,6 +6,7 @@ Created on Sat Mar 24 11:42:30 2018
 """
 
 import numpy as np
+import Activations as A
 
 class Data:
     Features = None
@@ -31,7 +32,40 @@ class Data:
         for ix in range(0, self.SizeOfData):
             FormattedResults[ix,:] = Categories[self.Results[ix]-1,:]
         return FormattedResults
+class NeuronLayer:
+    IsFinalLayer = None
+    Weight = None
+    ActivationValue = None
+    RegComponent = None
+    Error = None
+    def __init__(self,weight,isFinalLayer = False):
+        self.Weight = weight
+        self.IsFinalLayer = isFinalLayer
+                
+    def Activate(self, features, sizeOfFeatures):
+        features = np.column_stack((np.ones(sizeOfFeatures), features))
+        self.ActivationValue = np.dot(self.Weight.T,features)
+        
+    def CalculateError(self,results, outputDelta, outputWeight):
+        if self.IsFinalLayer:
+            Delta = self.ActivationValue - results
+            self.Error = np.dot(Delta.T,self.ActivationValue)
+        else:
+            Delta = np.dot(outputDelta,outputWeight)
+            self.Error(np.dot(Delta.T,self.ActivationValue))
+            
+    def UpdateWeights(self,sizeOfdata,learningRate):
+        weightGradient = (self.Error/sizeOfdata) + self.RegComponent
+        self.Weight += -learningRate*weightGradient
 
+class SigmoidNeuronLayer(NeuronLayer):
+    SigmoidActivationValue = None
+    def Activate(self, features, sizeOfFeatures):
+        super().Activate(features,sizeOfFeatures)
+        self.SigmoidActivationValue = 
+    
+            
+    
 class NeuralNetwork:
     TrainingData = None
     SizeOfInput = None
@@ -48,16 +82,5 @@ class NeuralNetwork:
     def initWithoutDataObject(cls,trainingFeatures,trainingResults,possibleResults,hiddenLayerSize,model = {}):
         trainingData = Data(trainingFeatures,trainingResults,possibleResults)
         return cls(trainingData,hiddenLayerSize,model)
-    def Sigmoid(self,z, derivative):
-        if derivative:
-            return self.Sigmoid(z, False)*(1-self.Sigmoid(z,False))
-        else:
-
-            return 1/(1+np.exp(-z)) 
-        
-    def Tanh(self,z,derivative=False):
-        if derivative:
-            return 1-self.Tanh(z)
-        else :
-            return np.tanh(z)   
+ 
 
