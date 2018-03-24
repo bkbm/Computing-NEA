@@ -52,4 +52,12 @@ class NeuralNetwork:
         if derivative:
             return self.Sigmoid(z, False)*(1-self.Sigmoid(z,False))
         else:
-            return 1/(1+np.exp(-z))   
+
+            return 1/(1+np.exp(-z)) 
+        
+    def Tanh(self,z,derivative=False):
+        if derivative:
+            return 1-self.Tanh(z)
+        else :
+            return np.tanh(z)   
+
