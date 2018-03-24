@@ -60,9 +60,14 @@ class NeuronLayer:
 
 class SigmoidNeuronLayer(NeuronLayer):
     SigmoidActivationValue = None
+    
     def Activate(self, features, sizeOfFeatures):
         super().Activate(features,sizeOfFeatures)
-        self.SigmoidActivationValue = 
+        self.SigmoidActivationValue = A.Sigmoid(self.ActivationValue) 
+    
+    def CalculateError(self,results,outputDelta,outputWeight):
+        
+    
     
             
     
