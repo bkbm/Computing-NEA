@@ -32,3 +32,29 @@ class Data:
             FormattedResults[ix,:] = Categories[self.Results[ix]-1,:]
         return FormattedResults
 
+class NeuralNetwork:
+    TrainingData = None
+    SizeOfInput = None
+    HiddenLayerSize = None
+    Model = None
+    
+    def __init__(self,trainingData,hiddenlayerSize,model = None):
+        self.TrainingData = trainingData
+        self.SizeOfInput = trainingData.NumberOfFeatures
+        self.HiddenLayerSize = hiddenlayerSize
+        self.SizeOfOutput = trainingData.PossibleResults
+        self.Model = model
+    @classmethod
+    def initWithoutDataObject(cls,trainingFeatures,trainingResults,possibleResults,hiddenLayerSize,model = {}):
+        trainingData = Data(trainingFeatures,trainingResults,possibleResults)
+        return cls(trainingData,hiddenLayerSize,model)
+    def Sigmoid(self,z, derivative):
+        if derivative:
+            return self.Sigmoid(z, False)*(1-self.Sigmoid(z,False))
+        else:
+            return 1/(1+np.exp(-z)) 
+    def Tanh(self,z,derivative=False):
+        if derivative:
+            return 1-self.Tanh(z)
+        else :
+            return np.tanh(z)
