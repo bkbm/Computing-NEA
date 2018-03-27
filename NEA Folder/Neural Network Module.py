@@ -32,37 +32,96 @@ class Data:
         for ix in range(0, self.SizeOfData):
             FormattedResults[ix,:] = Categories[self.Results[ix]-1,:]
         return FormattedResults
+    
 class NeuronLayer:
-    IsFinalLayer = None
-    Weight = None
-    ActivationValue = None
-    RegComponent = None
-    Error = None
-    def __init__(self,weight,isFinalLayer = False):
-        self.Weight = weight
-        self.IsFinalLayer = isFinalLayer
-                
-    def Activate(self, features, sizeOfFeatures):
-        features = np.column_stack((np.ones(sizeOfFeatures), features))
-        self.ActivationValue = np.dot(self.Weight.T,features)
-        
-    def CalculateError(self,results, outputDelta, outputWeight):
-        if self.IsFinalLayer:
-            Delta = self.ActivationValue - results
-            self.Error = np.dot(Delta.T,self.ActivationValue)
-        else:
-            Delta = np.dot(outputDelta,outputWeight)
-            self.Error(np.dot(Delta.T,self.ActivationValue))
-            
-    def UpdateWeights(self,sizeOfdata,learningRate):
-        weightGradient = (self.Error/sizeOfdata) + self.RegComponent
-        self.Weight += -learningRate*weightGradient
+	Inputs = None
+	SizeOfInputs = None
+	IsFinalLayer = None
+	Weight = None
+	ActivationValue = None
+	RegComponent = 0
+	Delta = None
+	Error = None
+
+	def __init__(self, inputs, sizeOfInputs, weight, isFinalLayer=False):
+		self.Inputs = inputs
+		self.SizeOfInputs = sizeOfInputs
+		self.Weight = weight
+		self.IsFinalLayer = isFinalLayer
+
+	def Activate(self):
+		features = np.column_stack((np.ones(self.SizeOfInputs), self.Inputs))
+		self.ActivationValue = np.array(
+		    np.dot(features, self.Weight.T), dtype=np.float32)
+
+	def CalculateError(self, results=None, outputDelta=None,
+	                   outputWeight=None):
+		features = np.column_stack((np.ones(len(self.Inputs)), self.Inputs))
+		if self.IsFinalLayer:
+			self.Delta = self.ActivationValue - results
+			self.Error = np.dot(self.Delta.T, features)
+		else:
+			self.Delta = np.dot(outputDelta, outputWeight)
+			self.Error(np.dot(self.Delta.T, features))
+
+	def UpdateWeights(self, sizeOfdata, learningRate):
+		weightGradient = (self.Error / sizeOfdata) + self.RegComponent
+		Modifier = np.array((-learningRate * weightGradient), dtype=np.float32)
+		self.Weight += Modifier
+
 
 class SigmoidNeuronLayer(NeuronLayer):
-    SigmoidActivationValue = None
-    def Activate(self, features, sizeOfFeatures):
-        super().Activate(features,sizeOfFeatures)
-        self.SigmoidActivationValue = 
+	SigmoidActivationValue = None
+
+	def Activate(self):
+		super().Activate()
+		self.SigmoidActivationValue = A.Sigmoid(self.ActivationValue)
+
+	def CalculateError(self, results=None, outputDelta=None,
+	                   outputWeight=None):
+		features = np.column_stack((np.ones(len(self.Inputs)), self.Inputs))
+		if self.IsFinalLayer:
+			self.Delta = self.SigmoidActivationValue - results
+			self.Error = np.dot(self.Delta.T, features)
+		else:
+			error = np.dot(outputDelta, outputWeight)
+			self.Delta = error * A.Sigmoid(
+			    np.column_stack((np.ones(len(self.ActivationValue)),
+			                     self.ActivationValue)), True)
+			self.Error = np.dot(self.Delta[:, 1:].T, features)
+       
+class TanHNeuronLayer(NeuronLayer):
+	TanHActivationValue = None
+
+	def Activate(self):
+		super().Activate()
+		self.TanHActivationValue = A.Tanh(self.ActivationValue)
+	
+	def CalculateError(self, results=None, outputDelta=None, outputWeight=None):
+	  features = np.column_stack((np.ones(len(self.Inputs)),self.Inputs))
+	  if self.IsFinalLayer:
+	    self.Delta = self.TanHActivationValue - results
+	    self.Error = np.dot(self.Delta.T, features)
+	  else:
+	    error = np.dot(outputDelta, outputWeight)
+	    self.Delta = error*A.Tanh(np.column_stack((np.ones(len(self.ActivationValue)),self.ActivationValue)), True)
+	    self.Error = np.dot(self.Delta[:,1:].T,features)
+	
+class SoftmaxNeuronLayer(NeuronLayer):
+  SoftmaxActivationValue = None
+  
+  def __init__(self, inputs, sizeOfInputs, weight):
+    super().__init__(inputs, sizeOfInputs, weight, True)
+  
+  def Activate(self):
+    super().Activate()
+    self.SoftmaxActivationValue = A.Softmax(self.ActivationValue)
+    
+  def CalculateError(self, results):
+    features = np.column_stack((np.ones(len(self.Inputs)),self.Inputs))
+    self.Delta = self.SoftmaxActivationValue - results
+    self.Error = np.dot(self.Delta.T, features)
+    
     
             
     
