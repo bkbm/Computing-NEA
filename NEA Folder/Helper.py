@@ -24,4 +24,26 @@ def InitialiseRandomWeights(L_In,L_Out,N=None):
 
 def CostFunction():
   return None
+
+def Predict(model, features, bestFit = True):
+  print(len(features))
+  model[0].Inputs = features
+  model[0].SizeOfInputs = len(features)
+  
+  for i in range(1,len(model)):
+    model[i-1].Activate()
+    print(np.round(model[i-1].FunctionValue,2))
+    print(model[i-1].FunctionValue.shape)
+    model[i].Inputs = model[i-1].FunctionValue
+    model[i].SizeOfInputs = len(model[i].Inputs)
+  model[i].Activate() 
+  if bestFit:
+    print(np.round(model[len(model)-1].FunctionValue,2))
+    print(model[len(model)-1].FunctionValue.shape)
+    return np.argmax(model[len(model)-1].FunctionValue, axis=1)
+  else:
+    return model[len(model)-1].FunctionValue
+
+def RegComponent(weight, m, regModifier = 0.01):
+  return (regModifier/m)*(np.column_stack((np.zeros(len(weight)),weight[:,1:])))
   
