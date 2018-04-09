@@ -41,6 +41,9 @@ def Predict(model, features, bestFit = True):
   else:
     return model[len(model)-1].FunctionValue
 
+def BiasedInput(inputs):
+    return np.column_stack((np.ones(len(inputs)), inputs))
+
 def RegComponent(weight, m, regModifier):
   return (regModifier/m)*(np.column_stack((np.zeros(len(weight)),weight[:,1:])))
 
